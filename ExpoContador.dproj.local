@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2016/06/23 13:56:25.000.382,=C:\Users\Jorge Kas-danouche\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2016/06/23 13:58:31.000.328,C:\Users\Jorge Kas-danouche\Documents\Embarcadero\Studio\Projects\Unit1.pas=C:\Users\Jorge Kas-danouche\Desktop\Contador para Exposicion\Unit1.pas</Transaction>
+    <Transaction>2016/06/23 13:58:31.000.328,C:\Users\Jorge Kas-danouche\Documents\Embarcadero\Studio\Projects\Unit1.dfm=C:\Users\Jorge Kas-danouche\Desktop\Contador para Exposicion\Unit1.dfm</Transaction>
+    <Transaction>2016/06/23 13:58:43.000.327,C:\Users\Jorge Kas-danouche\Documents\Embarcadero\Studio\Projects\Project1.dproj=C:\Users\Jorge Kas-danouche\Desktop\Contador para Exposicion\ExpoContador.dproj</Transaction>
+    <Transaction>2016/06/23 13:58:52.000.141,=C:\Users\Jorge Kas-danouche\Desktop\Contador para Exposicion\Unit2.pas</Transaction>
+  </Transactions>
+</BorlandProject>

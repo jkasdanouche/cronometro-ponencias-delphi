@@ -1,0 +1,241 @@
+unit Unit1;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.Menus;
+
+type
+  TForm1 = class(TForm)
+    TrayIcon1: TTrayIcon;
+    Panel1: TPanel;
+    PopupMenu1: TPopupMenu;
+    Play1: TMenuItem;
+    Stop1: TMenuItem;
+    Configuracin1: TMenuItem;
+    Salir1: TMenuItem;
+    N1: TMenuItem;
+    N2: TMenuItem;
+    Timer1: TTimer;
+    Timer2: TTimer;
+    procedure Salir1Click(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure Configuracin1Click(Sender: TObject);
+    function MinToSec(min:integer):integer;
+    function SecToMin(sec:integer):integer;
+    procedure Timer2Timer(Sender: TObject);
+    procedure Play1Click(Sender: TObject);
+    function MakeTime(sec:integer):string;
+    procedure Timer1Timer(Sender: TObject);
+    procedure Stop1Click(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    Procedure RegistrarHotkeys;
+    procedure QuitarHotKeys;
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure WMHotKey( VAR Msg: TWMHotKey); message WM_HOTKEY;
+  private
+    hotKeyCtrlI:integer;
+    hotKeyCtrlO:integer;
+    { Private declarations }
+  public
+    { Public declarations }
+    tiempo:integer;
+    PrimerInicio:boolean;
+  end;
+
+var
+  Form1: TForm1;
+
+implementation
+
+{$R *.dfm}
+
+uses Unit2;
+
+
+procedure TForm1.WMHotKey(var Msg: TWMHotKey);
+Begin
+  if Msg.HotKey = hotKeyCtrlI then
+  begin
+    Play1.Click;
+    //Showmessage('Hola');
+  end;
+  if Msg.HotKey = hotKeyCtrlO then
+  begin
+    if Stop1.Enabled then Stop1.Click;
+    //Showmessage('Hola2');
+  end;
+End;
+
+procedure TForm1.RegistrarHotkeys;
+begin
+   hotKeyCtrlI:= GlobalAddAtom('hotKeyCtrlI_nombre');
+   RegisterHotKey(Handle, hotKeyCtrlI, MOD_CONTROL, Ord('I'));
+
+   hotKeyCtrlO:= GlobalAddAtom('hotKeyCtrlO_nombre');
+   RegisterHotKey(Handle, hotKeyCtrlO, MOD_CONTROL, Ord('O'));
+end;
+
+procedure TForm1.QuitarHotKeys;
+begin
+  UnRegisterHotKey(Handle, hotKeyCtrlI);
+  GlobalDeleteAtom(hotKeyCtrlI);
+
+  UnRegisterHotKey(Handle, hotKeyCtrlO);
+  GlobalDeleteAtom(hotKeyCtrlO);
+end;
+
+
+function TForm1.MakeTime(sec: Integer):string;
+begin
+  result := inttostr(SecToMin(sec))+':';
+  sec := sec - (SecToMin(sec)*60);
+  if sec < 10 then result := result + '0';
+  result := result + IntToStr(sec);
+end;
+
+function TForm1.SecToMin(sec: Integer):integer;
+begin
+  result:=sec div 60
+end;
+
+procedure TForm1.Stop1Click(Sender: TObject);
+begin
+  play1.Caption := '&Play';
+  Stop1.Enabled:=False;
+  Configuracin1.Enabled := True;
+  Timer1.Enabled := False;
+  if Form2.RadioGroup1.ItemIndex = 0 then
+    Form1.tiempo := Form1.MinToSec(form2.spinedit1.Value) + form2.SpinEdit2.Value
+  else
+    Form1.tiempo := 0;
+  Panel1.Caption:=MakeTime(tiempo);
+  Timer2.Enabled:=False;
+  panel1.Font.Color := clwindowtext;
+  panel1.Color:=clBtnface;
+  fORM1.Hide;
+end;
+
+procedure TForm1.Timer1Timer(Sender: TObject);
+begin
+  if PrimerInicio then
+  begin
+    Form1.Hide;
+    PrimerInicio:=False;
+    Timer1.Enabled:=false;
+  end;
+  if Form2.RadioGroup1.ItemIndex = 0 then
+  begin
+    dec(tiempo);
+    if (tiempo <= (MinToSec(form2.spinedit3.Value) + form2.SpinEdit4.Value)) and not(Timer2.Enabled) then
+      Timer2.Enabled := True;
+    if tiempo <= 0 then
+      Timer1.Enabled:=false;
+
+  end;
+  if Form2.RadioGroup1.ItemIndex = 1 then
+  begin
+    inc(tiempo);
+    if (tiempo >= (MinToSec(form2.spinedit1.Value) + form2.SpinEdit2.Value) - (MinToSec(form2.spinedit3.Value) + form2.SpinEdit4.Value)) and not(Timer2.Enabled) then
+      Timer2.Enabled := True;
+    if tiempo >= (MinToSec(form2.spinedit1.Value) + form2.SpinEdit2.Value) then
+      Timer1.Enabled:=false;
+  end;
+  panel1.Caption:=MakeTime(tiempo);
+end;
+
+procedure TForm1.Timer2Timer(Sender: TObject);
+begin
+  if Form2.RadioGroup2.ItemIndex = 0 then
+  begin
+    if Form2.ColorBox2.Selected <> clBtnface then
+    begin
+      if panel1.Color = Form2.ColorBox2.Selected then
+      begin
+        panel1.Color:=clBtnface;
+      end
+      else
+      begin
+        panel1.Color := Form2.ColorBox2.Selected;
+      end;
+    end;
+
+    if Form2.ColorBox1.Selected <> clwindowtext then
+    begin
+      if panel1.Font.Color = Form2.ColorBox1.Selected then
+      begin
+        panel1.Font.Color := clwindowtext;
+      end
+      else
+      begin
+        panel1.Font.Color := Form2.ColorBox1.Selected;
+      end;
+    end;
+  end;
+end;
+
+function TForm1.MinToSec(min: Integer):integer;
+begin
+  result:=min * 60;
+end;
+
+procedure TForm1.Play1Click(Sender: TObject);
+begin
+  Form2.Close;
+  if play1.Caption = '&Play' then
+  begin
+    play1.Caption := '&Pause';
+    Timer1.Enabled:=True;
+  end
+  else if play1.Caption = '&Pause' then
+  begin
+    play1.Caption := '&Play';
+    Stop1.Enabled := False;
+    Timer1.Enabled:=False;
+  end;
+  Configuracin1.Enabled := False;
+  Stop1.Enabled:=True;
+  Form1.Show;
+end;
+
+procedure TForm1.Configuracin1Click(Sender: TObject);
+begin
+  Form2.ShowModal;
+end;
+
+procedure TForm1.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  QuitarHotKeys;
+end;
+
+procedure TForm1.FormCreate(Sender: TObject);
+begin
+   // if form2.RadioGroup1.ItemIndex = 0 then
+   // Form1.tiempo := Form1.MinToSec(form2.spinedit1.Value) + form2.SpinEdit2.Value
+  //else
+   // Form1.tiempo := 0;
+   //Application.MainFormOnTaskBar := False;
+   form1.Top:=0;
+   form1.Left:=screen.Width-form1.Width;
+   RegistrarHotkeys;
+   PrimerInicio:= True;
+end;
+
+procedure TForm1.FormShow(Sender: TObject);
+begin
+   ShowWindow( Application.Handle, SW_HIDE );
+   {SetWindowLong( Application.Handle, GWL_EXSTYLE,
+                GetWindowLong(Application.Handle, GWL_EXSTYLE) or
+                WS_EX_TOOLWINDOW and not WS_EX_APPWINDOW);
+   ShowWindow( Application.Handle, SW_SHOW );}
+  Form1.tiempo := Form1.MinToSec(form2.spinedit1.Value) + form2.SpinEdit2.Value;
+  Panel1.Caption:=MakeTime(tiempo);
+end;
+
+procedure TForm1.Salir1Click(Sender: TObject);
+begin
+  Application.Terminate;
+end;
+
+end.
